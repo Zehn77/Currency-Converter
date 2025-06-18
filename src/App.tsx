@@ -1,8 +1,16 @@
+import { Footer } from "./components/Footer";
+import { Header } from "./components/Header";
+import { MainContent } from "./components/MainContent";
+
 function App() {
   return (
-    <>
-      <h1 className="text-3xl font-bold underline">Tailwind CSS works!</h1>
-    </>
+    <div className="flex flex-col min-h-screen bg-gray-50 text-gray-800 font-sans">
+      <Header />
+
+      <MainContent />
+
+      <Footer />
+    </div>
   );
 }
 
