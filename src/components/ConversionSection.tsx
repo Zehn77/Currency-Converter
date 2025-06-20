@@ -3,57 +3,48 @@ import { CurrencySelector } from "./CurrencySelector";
 import { LiaExchangeAltSolid } from "react-icons/lia";
 import { currencies } from "../data/currencies";
 import type { Currency } from "../data/model";
-import { formatAmount, validateAmount } from "../helper/amount";
+import { validateAmount } from "../helper/amount";
+import { AmountInput } from "./AmountInput";
+import { useFetch } from "../hooks/useFetch";
+import { ClipLoader } from "react-spinners";
+import { ConversionResult } from "./ConversionResult";
 
 export const ConversionSection = () => {
-  const [inputActive, setInputActive] = useState(false);
-
   const [data, setData] = useState({
     from: currencies[0],
     to: currencies[1],
     amount: "1",
   });
 
+  const { fetchData, error, loading, responseData } = useFetch();
+
   const handleOnChangeFrom = (newCurrency: Currency) => {
     setData((d) => ({ ...d, from: newCurrency }));
+    handleOnSubmit(newCurrency.code);
   };
 
   const handleOnChangeTo = (newCurrency: Currency) => {
     setData((d) => ({ ...d, to: newCurrency }));
   };
 
+  const handleOnChangeAmount = (newAmount: string) => {
+    setData((d) => ({ ...d, amount: newAmount }));
+  };
+
   const handleSwap = () => {
     const { from, to } = data;
     setData((d) => ({ ...d, from: to, to: from }));
+    handleOnSubmit(to.code);
+  };
+
+  const handleOnSubmit = (code: string) => {
+    fetchData(code);
   };
 
   return (
     <section className="my-4 mx-4 px-8 py-5 bg-white rounded-2xl shadow-md p-6 border border-gray-200">
       <div className="flex flex-col md:flex-row gap-4 w-full ">
-        <div
-          className={`relative flex min-h-24 flex-1 flex-col p-4 border border-gray-200 rounded-lg hover:bg-gray-50 ${
-            inputActive ? "ring-2 ring-blue-400" : ""
-          }`}
-        >
-          <label htmlFor="amount" className="text-gray-500 text-sm">
-            Amount
-          </label>
-          <input
-            id="amount"
-            value={inputActive ? data.amount : formatAmount(data.amount)}
-            onChange={(e) => setData((d) => ({ ...d, amount: e.target.value }))}
-            type="text"
-            onFocus={() => setInputActive(true)}
-            onBlur={() => setInputActive(false)}
-            className={`outline-none font-bold text-3xl`}
-            autoComplete="off"
-          />
-          {validateAmount(data.amount) && (
-            <p className="absolute bottom-[-30px] text-red-500 text-md font-medium">
-              Please enter a valid amount
-            </p>
-          )}
-        </div>
+        <AmountInput amount={data.amount} onChange={handleOnChangeAmount} />
 
         <div className="relative flex flex-col md:flex-row gap-4 flex-2">
           <CurrencySelector
@@ -79,11 +70,25 @@ export const ConversionSection = () => {
         </div>
       </div>
 
-      <div className="flex justify-end mt-4">
+      <div className="flex justify-between items-start mt-4">
+        <div className="relative flex-1">
+          {loading && (
+            <div className="text-center absolute top-5 left-0 right-0 p-2 rounded-tl-lg rounded-tr-lg">
+              <ClipLoader className="" size={50} color="#1a1aff" />
+            </div>
+          )}
+
+          {error && (
+            <p className="text-red-500 text-lg font-semibold ml-4">{error}</p>
+          )}
+
+          {responseData && !validateAmount(data.amount) && (
+            <ConversionResult data={data} responseData={responseData} />
+          )}
+        </div>
+
         <button
-          onClick={() => {
-            console.log(data);
-          }}
+          onClick={() => handleOnSubmit(data.from.code)}
           disabled={validateAmount(data.amount)}
           className={`bg-blue-600  hover:bg-blue-700 text-white text-md font-semibold py-2.5 px-7 rounded-md shadow-md transition-all duration-200 ease-in-out  focus:ring-opacity-75 ${
             validateAmount(data.amount)
