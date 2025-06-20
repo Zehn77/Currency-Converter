@@ -2,7 +2,7 @@ import { useState } from "react";
 import { API } from "../api/api";
 
 export function useFetch() {
-  const [responseData, setData] = useState<null>();
+  const [responseData, setData] = useState<null | { [code: string]: number }>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -13,7 +13,7 @@ export function useFetch() {
     try {
       const res = await API.fetch(code);
       setData(res.rates);
-      console.log(res.rates);
+      return res.rates;
     } catch {
       setError("Something went wrong");
       setData(null);

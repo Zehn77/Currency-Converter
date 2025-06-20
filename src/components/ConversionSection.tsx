@@ -2,14 +2,18 @@ import { useState } from "react";
 import { CurrencySelector } from "./CurrencySelector";
 import { LiaExchangeAltSolid } from "react-icons/lia";
 import { currencies } from "../data/currencies";
-import type { Currency } from "../data/model";
+import type { Currency, StoredItem } from "../data/model";
 import { validateAmount } from "../helper/amount";
 import { AmountInput } from "./AmountInput";
 import { useFetch } from "../hooks/useFetch";
 import { ClipLoader } from "react-spinners";
 import { ConversionResult } from "./ConversionResult";
 
-export const ConversionSection = () => {
+export const ConversionSection = ({
+  addItem,
+}: {
+  addItem: (item: StoredItem) => void;
+}) => {
   const [data, setData] = useState({
     from: currencies[0],
     to: currencies[1],
@@ -38,7 +42,20 @@ export const ConversionSection = () => {
   };
 
   const handleOnSubmit = (code: string) => {
-    fetchData(code);
+    fetchData(code).then((responseData) => {
+      const newItem: StoredItem = {
+        id: Date.now(),
+        amount: data.amount,
+        amountName: data.from.name,
+        resultAmount: (
+          Number(data.amount) * responseData[data.to.code]
+        ).toFixed(2),
+        resultAmountName: data.to.name,
+        date: new Date().toISOString(),
+      };
+
+      addItem(newItem);
+    });
   };
 
   return (
@@ -71,13 +88,7 @@ export const ConversionSection = () => {
       </div>
 
       <div className="flex justify-between items-start mt-4">
-        <div className="relative flex-1">
-          {loading && (
-            <div className="text-center absolute top-5 left-0 right-0 p-2 rounded-tl-lg rounded-tr-lg">
-              <ClipLoader className="" size={50} color="#1a1aff" />
-            </div>
-          )}
-
+        <div className="">
           {error && (
             <p className="text-red-500 text-lg font-semibold ml-4">{error}</p>
           )}
@@ -85,6 +96,10 @@ export const ConversionSection = () => {
           {responseData && !validateAmount(data.amount) && (
             <ConversionResult data={data} responseData={responseData} />
           )}
+        </div>
+
+        <div className="min-h-12 flex items-center justify-center">
+          {loading && <ClipLoader className="" size={30} color="#1a1aff" />}
         </div>
 
         <button

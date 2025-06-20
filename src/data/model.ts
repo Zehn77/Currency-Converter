@@ -5,3 +5,16 @@ export interface Currency {
   flag: string;
   symbol: string;
 }
+
+export interface ResponseData {
+  [code: string]: number;
+}
+
+export type StoredItem = {
+  id: number;
+  amount: string;
+  amountName: string;
+  resultAmount: string;
+  resultAmountName: string;
+  date: string;
+};

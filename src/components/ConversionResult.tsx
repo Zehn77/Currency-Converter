@@ -1,4 +1,4 @@
-import type { Currency } from "../data/model";
+import type { Currency, ResponseData } from "../data/model";
 import { formatCurrencyAmount } from "../helper/amount";
 
 type ConversionResultProps = {
@@ -7,7 +7,7 @@ type ConversionResultProps = {
     to: Currency;
     from: Currency;
   };
-  responseData: { [code: string]: number };
+  responseData: ResponseData;
 };
 
 export const ConversionResult = ({
